@@ -13,8 +13,8 @@ class TopTitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color selectedCardColor = const Color(0xFF002596);
-    Color unselectedCardColor = const Color(0xFFCBD8FF);
+    Color selectedCardColor = Theme.of(context).primaryColor;
+    Color unselectedCardColor = Theme.of(context).cardColor;
 
     final Color backgroundColor =
         isSelected ? selectedCardColor : unselectedCardColor;
@@ -28,7 +28,7 @@ class TopTitleBar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Text(title,
-            style: AppTextStyle.buttonMedium.copyWith(color: textColor)),
+            style: AppTextStyle.buttonSmall.copyWith(color: textColor)),
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppThemes {
   //light theme
   static final light = ThemeData(
-    primaryColor: const Color(0xFF1B2C5E),
+    primaryColor: const Color(0xFF002596),
     scaffoldBackgroundColor: Colors.white,
     brightness: Brightness.light,
     appBarTheme: const AppBarTheme(
@@ -18,9 +18,11 @@ class AppThemes {
       primary: const Color(0xFF1B2C5E),
       brightness: Brightness.light,
       surface: Colors.white,
+      secondary: const Color(0xFF6A6FA5)
     ),
 
-    cardColor: const Color(0xFF002596),
+    cardColor: const Color(0xFFEAEFFF),
+
 
 
 
