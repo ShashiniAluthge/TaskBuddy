@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppThemes {
   //light theme
   static final light = ThemeData(
-    primaryColor: const Color(0xFF002596),
+    primaryColor: const Color(0xFF1B2C5E),
     scaffoldBackgroundColor: Colors.white,
     brightness: Brightness.light,
     appBarTheme: const AppBarTheme(
@@ -14,17 +14,21 @@ class AppThemes {
       ),
     ),
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF002596),
-      primary: const Color(0xFF002596),
+      seedColor: const Color(0xFF1B2C5E),
+      primary: const Color(0xFF1B2C5E),
       brightness: Brightness.light,
       surface: Colors.white,
     ),
-    cardColor: Colors.white,
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
-      selectedItemColor: Color(0xFF002596),
-      unselectedItemColor: Colors.grey,
-    ),
+
+    cardColor: const Color(0xFF002596),
+
+
+
+    // bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+    //   backgroundColor: Colors.white,
+    //   selectedItemColor: Color(0xFF002596),
+    //   unselectedItemColor: Colors.grey,
+    // ),
   );
 }
 
