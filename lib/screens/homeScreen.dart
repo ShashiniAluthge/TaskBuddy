@@ -169,9 +169,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 30.0),
+            TaskCard(
+              taskTitle: 'Team Meeting',
+              taskTime: '8:00 AM',
+              taskDescription:
+              'Discuss all ideas and questions about new projects.',
+              taskStatus: 'Ongoing', onDelete: () {  },
+            ),
             Expanded(
               child: taskList.isEmpty
-                  ? const Center(child: Text('No tasks found.'))
+                  ? const Center(child: Text('No new To-Do tasks added.'))
                   : ListView.builder(
                       itemCount: taskList.length,
                       itemBuilder: (context, index) {
@@ -181,10 +188,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           taskTime: task['startTime'] ?? 'No time',
                           taskDescription:
                               task['description'] ?? 'No description',
+                          onDelete: () async {
+                            setState(() {
+                              taskList.removeAt(index);
+                            });
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            await prefs.setStringList('tasks',
+                                taskList.map((e) => jsonEncode(e)).toList());
+                          },
                         );
                       },
                     ),
             ),
+
           ],
         ),
       ),
