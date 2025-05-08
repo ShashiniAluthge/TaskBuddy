@@ -13,7 +13,7 @@ class TaskCard extends StatelessWidget {
       required this.taskTitle,
       required this.taskTime,
       required this.taskDescription,
-      required this.taskStatus});
+       this.taskStatus = 'To Do'});
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_buddy/screens/addTaskScreen.dart';
 import 'package:task_buddy/utils/app_textStyles.dart';
 import 'package:task_buddy/widgets/taskCard.dart';
@@ -16,6 +19,27 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
 
   final List<String> topTitles = ['My tasks', 'Projects', 'Notes'];
+
+  List<Map<String, String>> taskList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadTasks();
+  }
+
+  Future<void> loadTasks() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> taskJsonList = prefs.getStringList('tasks') ?? [];
+
+    List<Map<String, String>> loadedTasks = taskJsonList
+        .map((taskJson) => Map<String, String>.from(jsonDecode(taskJson)))
+        .toList();
+
+    setState(() {
+      taskList = loadedTasks;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Today Tasks',
+                  'Tasks',
                   style: AppTextStyle.bodyLarge
                       .copyWith(color: Theme.of(context).colorScheme.primary),
                 ),
@@ -110,11 +134,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (e) => const AddTaskScreen()));
+                      onTap: () async {
+                        final newTask = await Navigator.push(context,
+                            MaterialPageRoute(builder: (e) => AddTaskScreen()));
+
+                        if (newTask != null) {
+                          setState(() {
+                            taskList.add(Map<String, String>.from(newTask));
+                          });
+                        }
+
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        List<String> existingTasks =
+                            prefs.getStringList('tasks') ?? [];
+                        existingTasks.add(jsonEncode(newTask));
+                        await prefs.setStringList('tasks', existingTasks);
                       },
                       child: Row(
                         children: [
@@ -134,39 +169,21 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 30.0),
-            const Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    TaskCard(
-                      taskTitle: 'Team Meeting',
-                      taskTime: '8:00 AM',
-                      taskDescription:
-                          'Discuss all ideas and questions about new projects.',
-                      taskStatus: 'Ongoing',
+            Expanded(
+              child: taskList.isEmpty
+                  ? const Center(child: Text('No tasks found.'))
+                  : ListView.builder(
+                      itemCount: taskList.length,
+                      itemBuilder: (context, index) {
+                        final task = taskList[index];
+                        return TaskCard(
+                          taskTitle: task['title'] ?? 'No title',
+                          taskTime: task['startTime'] ?? 'No time',
+                          taskDescription:
+                              task['description'] ?? 'No description',
+                        );
+                      },
                     ),
-                    TaskCard(
-                      taskTitle: 'Check mail',
-                      taskTime: '10:00 AM',
-                      taskDescription:
-                          'Check all mails regarding the projects.',
-                      taskStatus: 'To Do',
-                    ),
-                    TaskCard(
-                      taskTitle: 'Dashboard Design',
-                      taskTime: '10:30 AM',
-                      taskDescription: 'Design UI for the Dashboard',
-                      taskStatus: 'To Do',
-                    ),
-                    TaskCard(
-                      taskTitle: 'Update Report',
-                      taskTime: '3:00 PM',
-                      taskDescription: 'Update all updates of the project',
-                      taskStatus: 'To Do',
-                    ),
-                  ],
-                ),
-              ),
             ),
           ],
         ),
