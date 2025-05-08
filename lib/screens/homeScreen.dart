@@ -173,35 +173,79 @@ class _HomeScreenState extends State<HomeScreen> {
               taskTitle: 'Team Meeting',
               taskTime: '8:00 AM',
               taskDescription:
-              'Discuss all ideas and questions about new projects.',
-              taskStatus: 'Ongoing', onDelete: () {  },
+                  'Discuss all ideas and questions about new projects.',
+              taskStatus: 'Ongoing',
+              onDelete: () {},
             ),
             Expanded(
               child: taskList.isEmpty
-                  ? const Center(child: Text('No new To-Do tasks added.'))
+                  ? const Center(child: Text('No new To-Do tasks added'))
                   : ListView.builder(
                       itemCount: taskList.length,
                       itemBuilder: (context, index) {
                         final task = taskList[index];
-                        return TaskCard(
-                          taskTitle: task['title'] ?? 'No title',
-                          taskTime: task['startTime'] ?? 'No time',
-                          taskDescription:
-                              task['description'] ?? 'No description',
-                          onDelete: () async {
+                        return Dismissible(
+                          //this for delete by swiping
+                          key: Key(task['title'] ?? index.toString()),
+                          dismissThresholds: const {
+                            DismissDirection.endToStart: 0.5,
+                          },
+                          direction: DismissDirection.endToStart,
+                          confirmDismiss: (direction) async {
+                            return true;
+                          },
+                          onDismissed: (direction) async {
                             setState(() {
                               taskList.removeAt(index);
                             });
+
                             SharedPreferences prefs =
                                 await SharedPreferences.getInstance();
-                            await prefs.setStringList('tasks',
+                            prefs.setStringList('tasks',
                                 taskList.map((e) => jsonEncode(e)).toList());
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Task deleted!'),
+                                backgroundColor: Colors.redAccent,
+                                behavior: SnackBarBehavior.floating,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
                           },
+
+                          background: Container(
+                            color: Theme.of(context).primaryColor,
+                            alignment: Alignment.centerRight,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: const Icon(
+                              Icons.delete_forever,
+                              color: Colors.white,
+                              size: 30.0,
+                            ),
+                          ),
+
+                          child: TaskCard(
+                            taskTitle: task['title'] ?? 'No title',
+                            taskTime: task['startTime'] ?? 'No time',
+                            taskDescription:
+                                task['description'] ?? 'No description',
+                            onDelete: () async {
+                              //this for delete by using popup menu delete item
+                              setState(() {
+                                taskList.removeAt(index);
+                              });
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setStringList('tasks',
+                                  taskList.map((e) => jsonEncode(e)).toList());
+                            },
+                          ),
                         );
                       },
                     ),
             ),
-
           ],
         ),
       ),

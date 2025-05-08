@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_buddy/utils/app_textStyles.dart';
@@ -14,9 +13,9 @@ class AddTaskScreen extends StatefulWidget {
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
   var titleController = TextEditingController();
-  var dateController = TextEditingController();
+
   var startTimeController = TextEditingController();
-  var endTimeController = TextEditingController();
+
   var descriptionController = TextEditingController();
 
   @override
@@ -51,10 +50,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               title: 'Title',
               controller: titleController,
             ),
-            InputField(
-              title: 'Date',
-              controller: dateController,
-            ),
+
             InputField(
               title: 'Start Time',
               controller: startTimeController,
@@ -93,9 +89,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   ),
                   onPressed: () async {
                     var title = titleController.text.toString();
-                    var date = dateController.text.toString();
+
                     var startTime = startTimeController.text.toString();
-                    var endTime = endTimeController.text.toString();
+
                     var description = descriptionController.text.toString();
 
                     if (title.isEmpty && description.isEmpty) {
@@ -133,7 +129,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         duration: const Duration(seconds: 2),
                       ),
                     );
-                    Navigator.pop(context,newTask);
+                    Navigator.pop(context, newTask);
                   },
                   child: Text(
                     'Create Task',
