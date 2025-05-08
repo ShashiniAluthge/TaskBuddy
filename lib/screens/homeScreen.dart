@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:task_buddy/screens/addTaskScreen.dart';
 import 'package:task_buddy/utils/app_textStyles.dart';
 import 'package:task_buddy/widgets/taskCard.dart';
 import 'package:task_buddy/widgets/topTitlebar.dart';
@@ -108,7 +110,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (e) => const AddTaskScreen()));
+                      },
                       child: Row(
                         children: [
                           const Padding(

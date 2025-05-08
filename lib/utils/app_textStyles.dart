@@ -35,7 +35,7 @@ class AppTextStyle {
 
   //button text
   static TextStyle buttonLarge = GoogleFonts.poppins(
-      fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5);
+      fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 0.5);
   static TextStyle buttonMedium = GoogleFonts.poppins(
     fontSize: 15,
     fontWeight: FontWeight.w600,
