@@ -4,18 +4,23 @@ import '../utils/app_textStyles.dart';
 
 class TaskCard extends StatelessWidget {
   final String taskTitle;
-  final String taskTime;
+  final String taskDate;
+  final String taskStartTime;
+  final String taskEndTime;
   final String taskDescription;
   final String taskStatus;
   final VoidCallback onDelete;
 
-  const TaskCard(
-      {super.key,
-      required this.taskTitle,
-      required this.taskTime,
-      required this.taskDescription,
-      this.taskStatus = 'To Do',
-      required this.onDelete});
+  const TaskCard({
+    super.key,
+    required this.taskTitle,
+    required this.taskDate,
+    required this.taskStartTime,
+    required this.taskEndTime,
+    required this.taskDescription,
+    this.taskStatus = 'To Do',
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,20 +32,21 @@ class TaskCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20.0)),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        taskTitle,
-                        style: AppTextStyle.bodyMedium.copyWith(
-                            color: Theme.of(context).colorScheme.primary),
-                      ),
-                      PopupMenuButton(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          taskTitle,
+                          style: AppTextStyle.bodyMedium.copyWith(
+                              color: Theme.of(context).colorScheme.primary),
+                        ),
+                        PopupMenuButton(
                           icon: const Icon(Icons.more_vert_outlined),
                           color: Colors.white,
                           onSelected: (value) {
@@ -71,53 +77,74 @@ class TaskCard extends StatelessWidget {
                                 ))
                           ],
                         ),
-
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          Icons.access_time_outlined,
-                          color: Theme.of(context).primaryColor,
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.calendar_month_outlined,
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
+                        Text(taskDate,
+                            style: AppTextStyle.bodySmall.copyWith(
+                              color: Theme.of(context).colorScheme.secondary,
+                            )),
+                      ],
+                    ),
+                    const SizedBox(height: 10.0),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.access_time_outlined,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        Text(taskStartTime,
+                            style: AppTextStyle.bodySmall.copyWith(
+                              color: Theme.of(context).colorScheme.secondary,
+                            )),
+                        const SizedBox(width: 10.0),
+                        Text('-  $taskEndTime',
+                            style: AppTextStyle.bodySmall.copyWith(
+                              color: Theme.of(context).colorScheme.secondary,
+                            )),
+                      ],
+                    )
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+                Text(
+                  taskDescription,
+                  style: AppTextStyle.bodySmall
+                      .copyWith(color: Theme.of(context).colorScheme.secondary),
+                ),
+                const SizedBox(height: 10.0),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IntrinsicWidth(
+                    child: Container(
+                      height: 40.0,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.0)),
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 6.0, horizontal: 16.0),
+                        child: Text(taskStatus,
+                            style: AppTextStyle.buttonSmall
+                                .copyWith(color: Colors.cyan)),
                       ),
-                      Text(taskTime,
-                          style: AppTextStyle.bodySmall.copyWith(
-                            color: Theme.of(context).colorScheme.secondary,
-                          )),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 10.0),
-              Text(
-                taskDescription,
-                style: AppTextStyle.bodySmall
-                    .copyWith(color: Theme.of(context).colorScheme.secondary),
-              ),
-              const SizedBox(height: 10.0),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IntrinsicWidth(
-                  child: Container(
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.0)),
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 6.0, horizontal: 16.0),
-                      child: Text(taskStatus,
-                          style: AppTextStyle.buttonSmall
-                              .copyWith(color: Colors.cyan)),
                     ),
                   ),
                 ),
-              ),
-            ]),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 15.0)

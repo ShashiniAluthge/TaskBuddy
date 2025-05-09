@@ -1,10 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_buddy/screens/addTaskScreen.dart';
 import 'package:task_buddy/utils/app_textStyles.dart';
+import 'package:task_buddy/widgets/alertDialog.dart';
 import 'package:task_buddy/widgets/taskCard.dart';
 import 'package:task_buddy/widgets/topTitlebar.dart';
 
@@ -169,14 +168,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 30.0),
-            TaskCard(
-              taskTitle: 'Team Meeting',
-              taskTime: '8:00 AM',
-              taskDescription:
-                  'Discuss all ideas and questions about new projects.',
-              taskStatus: 'Ongoing',
-              onDelete: () {},
-            ),
             Expanded(
               child: taskList.isEmpty
                   ? const Center(child: Text('No new To-Do tasks added'))
@@ -191,8 +182,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             DismissDirection.endToStart: 0.5,
                           },
                           direction: DismissDirection.endToStart,
+
                           confirmDismiss: (direction) async {
-                            return true;
+                            final result =
+                                await showConfirmDeleteDialog(context); //implement confirm delete dialog
+                            return result ?? false;
+
                           },
                           onDismissed: (direction) async {
                             setState(() {
@@ -228,14 +223,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           child: TaskCard(
                             taskTitle: task['title'] ?? 'No title',
-                            taskTime: task['startTime'] ?? 'No time',
+                            taskDate: task['date'] ?? 'No date',
+                            taskStartTime: task['startTime'] ?? 'No start time',
+                            taskEndTime: task['endTime']?? 'No end time',
                             taskDescription:
                                 task['description'] ?? 'No description',
                             onDelete: () async {
                               //this for delete by using popup menu delete item
-                              setState(() {
-                                taskList.removeAt(index);
-                              });
+                              bool? result =
+                                  await showConfirmDeleteDialog(context);
+                              if (result == true) {
+                                setState(() {
+                                  taskList.removeAt(index);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Task deleted!'),
+                                      backgroundColor: Colors.redAccent,
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                });
+                              }
+
                               SharedPreferences prefs =
                                   await SharedPreferences.getInstance();
                               await prefs.setStringList('tasks',
