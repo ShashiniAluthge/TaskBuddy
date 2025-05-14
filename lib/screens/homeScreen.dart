@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_buddy/screens/addTaskScreen.dart';
@@ -38,6 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       taskList = loadedTasks;
     });
+  }
+
+  //for save tasks to shared preferences
+  Future<void> saveTasks() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        'tasks', taskList.map((e) => jsonEncode(e)).toList());
   }
 
   @override
@@ -134,8 +142,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: GestureDetector(
                       onTap: () async {
-                        final newTask = await Navigator.push(context,
-                            MaterialPageRoute(builder: (e) => AddTaskScreen()));
+                        final newTask = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (e) => AddTaskScreen(
+                                      isEditing: false,
+                                    )));
 
                         if (newTask != null) {
                           setState(() {
@@ -184,20 +196,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           direction: DismissDirection.endToStart,
 
                           confirmDismiss: (direction) async {
-                            final result =
-                                await showConfirmDeleteDialog(context); //implement confirm delete dialog
+                            final result = await showConfirmDialog(
+                                context); //implement confirm delete dialog
                             return result ?? false;
-
                           },
                           onDismissed: (direction) async {
                             setState(() {
                               taskList.removeAt(index);
                             });
 
-                            SharedPreferences prefs =
-                                await SharedPreferences.getInstance();
-                            prefs.setStringList('tasks',
-                                taskList.map((e) => jsonEncode(e)).toList());
+                            await saveTasks();
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -225,13 +233,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             taskTitle: task['title'] ?? 'No title',
                             taskDate: task['date'] ?? 'No date',
                             taskStartTime: task['startTime'] ?? 'No start time',
-                            taskEndTime: task['endTime']?? 'No end time',
+                            taskEndTime: task['endTime'] ?? 'No end time',
                             taskDescription:
                                 task['description'] ?? 'No description',
                             onDelete: () async {
                               //this for delete by using popup menu delete item
-                              bool? result =
-                                  await showConfirmDeleteDialog(context);
+                              bool? result = await showConfirmDialog(context,
+                                  alertTitle: 'Confirm Delete',
+                                  performTitle: 'Deleting...',
+                                  question:
+                                      'Are you sure want to delete a task?',
+                                  answerText1: 'Cancel',
+                                  answerText2: 'Delete');
                               if (result == true) {
                                 setState(() {
                                   taskList.removeAt(index);
@@ -245,11 +258,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 });
                               }
+                              await saveTasks();
+                            },
+                            onEdit: () async {
+                              final editTask = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (e) => AddTaskScreen(
+                                            task: task,
+                                            isEditing: true,
+                                          )));
 
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setStringList('tasks',
-                                  taskList.map((e) => jsonEncode(e)).toList());
+                              if (editTask != null) {
+                                setState(() {
+                                  taskList[index] =
+                                      Map<String, String>.from(editTask);
+                                });
+
+                                await saveTasks();
+                              }
                             },
                           ),
                         );

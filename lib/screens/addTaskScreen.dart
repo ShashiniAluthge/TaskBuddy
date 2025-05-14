@@ -2,10 +2,17 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_buddy/utils/app_textStyles.dart';
+import 'package:task_buddy/widgets/alertDialog.dart';
 import 'package:task_buddy/widgets/inputfield.dart';
 
 class AddTaskScreen extends StatefulWidget {
-  AddTaskScreen({super.key});
+  //this for receive task data for editing
+  final Map<String, String>? task;
+  final bool isEditing;
+  final int? taskIndex;
+
+  AddTaskScreen(
+      {super.key, this.task, required this.isEditing, this.taskIndex});
 
   @override
   State<AddTaskScreen> createState() => _AddTaskScreenState();
@@ -17,10 +24,24 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   var startTimeController = TextEditingController();
   var endTimeController = TextEditingController();
   var descriptionController = TextEditingController();
+  bool isEditing = false;
+
+  int originalIndex = -1; //store original task index for if editing
 
   @override
   void initState() {
     super.initState();
+
+    //check if edit existing task
+    if (widget.task != null) {
+      isEditing = true;
+
+      titleController.text = widget.task!['title'] ?? '';
+      dateController.text = widget.task!['date'] ?? '';
+      startTimeController.text = widget.task!['startTime'] ?? '';
+      endTimeController.text = widget.task!['endTime'] ?? '';
+      descriptionController.text = widget.task!['description'] ?? '';
+    }
   }
 
   // for date picker
@@ -56,6 +77,40 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   }
 
+  Future<void> saveTask(taskData) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    List<String> taskList = prefs.getStringList('tasks') ?? [];
+
+    taskList.add(jsonEncode(taskData));
+    await prefs.setStringList('tasks', taskList);
+  }
+
+  void showSnackBarMessage(taskData, bool isEdit) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isEdit ? 'Task updated!' : 'Task created!'),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    Navigator.pop(context, taskData);
+  }
+
+  Future<void> updateExistingTask(taskData, int index) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> taskList = prefs.getStringList('tasks') ?? [];
+
+    if (index >= 0 && index < taskList.length) {
+      taskList[index] = jsonEncode(taskData);
+      await prefs.setStringList('tasks', taskList);
+    } else {
+      taskList.add(jsonEncode(taskData));
+      await prefs.setStringList('tasks', taskList);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +126,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           ),
         ),
         title: Text(
-          'Create New task',
+          isEditing ? 'Edit Task' : 'Create New task',
           style: TextStyle(color: Theme.of(context).colorScheme.primary),
         ),
       ),
@@ -134,7 +189,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               controller: descriptionController,
               //hintText: 'Add a short description',
               isTextArea: true,
-
             ),
             const SizedBox(height: 50.0),
             Padding(
@@ -147,11 +201,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                   onPressed: () async {
-                    var title = titleController.text.toString();
-                    var date = dateController.text.toString();
-                    var startTime = startTimeController.text.toString();
-                    var endTime = endTimeController.text.toString();
-                    var description = descriptionController.text.toString();
+                    var title = titleController.text.trim();
+                    var date = dateController.text.trim();
+                    var startTime = startTimeController.text.trim();
+                    var endTime = endTimeController.text.trim();
+                    var description = descriptionController.text.trim();
 
                     if (title.isEmpty && description.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -165,12 +219,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       return;
                     }
 
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-
-                    List<String> taskList = prefs.getStringList('tasks') ?? [];
-
-                    Map<String, String> newTask = {
+                    Map<String, String> taskData = {
                       'title': title,
                       'date': date,
                       'startTime': startTime,
@@ -178,22 +227,31 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       'description': description,
                     };
 
-                    taskList.add(jsonEncode(newTask));
-                    await prefs.setStringList('tasks', taskList);
+                    if (isEditing) {
+                      bool? confirmed = await showConfirmDialog(context,
+                          alertTitle: 'Confirm Edit',
+                          performTitle: 'Updating...',
+                          question: 'Are you sure want to edit this task?',
+                          answerText1: 'cancel',
+                          answerText2: 'Save');
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Task created!'),
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                    Navigator.pop(context, newTask);
+                      if (confirmed != true) {
+                        return; // for cancel
+                      }
+                      if (widget.taskIndex != null) {
+                        await updateExistingTask(taskData, widget.taskIndex!);
+                      } else {
+                        await saveTask(taskData);
+                      }
+
+                      showSnackBarMessage(taskData, isEditing = true);
+                    } else {
+                      await saveTask(taskData);
+                      showSnackBarMessage(taskData, isEditing = false);
+                    }
                   },
                   child: Text(
-                    'Create Task',
+                    isEditing ? 'Save' : 'Create Task',
                     style:
                         AppTextStyle.buttonLarge.copyWith(color: Colors.white),
                   ),
@@ -205,6 +263,4 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ),
     );
   }
-
-  //
 }

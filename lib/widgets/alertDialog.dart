@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
-
 import '../utils/app_textStyles.dart';
 
-Future<bool?> showConfirmDeleteDialog(BuildContext context) {
+Future<bool?> showConfirmDialog(
+  BuildContext context, {
+  String alertTitle = 'Confirm Delete',
+  String performTitle = 'Deleting...',
+  String question = 'Are you sure want to delete a task?',
+  String answerText1 = 'Cancel',
+  String answerText2 = 'Delete',
+}) {
   bool isDeleting = false;
 
   return showDialog<bool>(
@@ -22,21 +28,21 @@ Future<bool?> showConfirmDeleteDialog(BuildContext context) {
           return AlertDialog(
             title: Center(
                 child: Text(
-              'Confirm Delete',
+              alertTitle,
               style: AppTextStyle.buttonLarge
                   .copyWith(color: Theme.of(context).primaryColor),
             )),
             content: isDeleting
-                ? const Column(
+                ? Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("Deleting..."),
+                      Text(performTitle),
                       SizedBox(height: 20),
                       CircularProgressIndicator(),
                     ],
                   )
                 : Column(mainAxisSize: MainAxisSize.min, children: [
-                    const Text('Are you sure want to delete a task?'),
+                    Text(question),
                     const SizedBox(height: 20.0),
                     Row(
                       // crossAxisAlignment: CrossAxisAlignment.center,
@@ -46,14 +52,14 @@ Future<bool?> showConfirmDeleteDialog(BuildContext context) {
                             onPressed: () {
                               Navigator.of(context).pop(false);
                             },
-                            child: const Text('Cancel')),
+                            child: Text(answerText1)),
                         const SizedBox(width: 10.0),
                         TextButton(
                             onPressed: () {
                               handleDelete();
                             },
-                            child: const Text(
-                              'Delete',
+                            child: Text(
+                              answerText2,
                               style: TextStyle(color: Colors.red),
                             ))
                       ],

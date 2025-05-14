@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../utils/app_textStyles.dart';
 
 class TaskCard extends StatelessWidget {
@@ -10,6 +9,7 @@ class TaskCard extends StatelessWidget {
   final String taskDescription;
   final String taskStatus;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
   const TaskCard({
     super.key,
@@ -20,6 +20,7 @@ class TaskCard extends StatelessWidget {
     required this.taskDescription,
     this.taskStatus = 'To Do',
     required this.onDelete,
+    required this.onEdit,
   });
 
   @override
@@ -51,6 +52,7 @@ class TaskCard extends StatelessWidget {
                           color: Colors.white,
                           onSelected: (value) {
                             if (value == 'Edit') {
+                              onEdit();
                             } else if (value == 'Delete') {
                               onDelete();
                             }
